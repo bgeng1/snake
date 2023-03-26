@@ -1,11 +1,11 @@
 type Direction = "up" | "down" | "left" | "right";
 
-interface Rectangle {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
+// interface Rectangle {
+//   x: number;
+//   y: number;
+//   w: number;
+//   h: number;
+// }
 
 interface Node {
   x: number;
@@ -161,20 +161,20 @@ export class Snake {
     this.fruitY = Math.floor(Math.random() * (squaresY - 1)) * this.width;
   }
 
-  private detectEntityCollision(rect1: Rectangle, rect2: Rectangle) {
-    if (
-      rect1.x < rect2.x + rect2.w &&
-      rect1.x + rect1.w > rect2.x &&
-      rect1.y < rect2.y + rect2.h &&
-      rect1.h + rect1.y > rect2.y
-    ) {
-      // Collision detected
-      return true;
-    } else {
-      // No collision
-      return false;
-    }
-  }
+  // private detectEntityCollision(rect1: Rectangle, rect2: Rectangle) {
+  //   if (
+  //     rect1.x < rect2.x + rect2.w &&
+  //     rect1.x + rect1.w > rect2.x &&
+  //     rect1.y < rect2.y + rect2.h &&
+  //     rect1.h + rect1.y > rect2.y
+  //   ) {
+  //     // Collision detected
+  //     return true;
+  //   } else {
+  //     // No collision
+  //     return false;
+  //   }
+  // }
 
   private detectGridCollision(node1: Node, node2: Node) {
     if (node1.x === node2.x && node1.y === node2.y) {

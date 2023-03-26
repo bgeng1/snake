@@ -14,6 +14,7 @@ interface Node {
 
 export class Snake {
   private direction: Direction = "right";
+  private nextDirection: Direction = "right";
   private ctx: CanvasRenderingContext2D;
   private headNode: Node = {
     x: 500,
@@ -51,26 +52,30 @@ export class Snake {
   }
 
   update() {
-    let head = this.body[0];
+    let newHead = {
+      x: this.body[0].x,
+      y: this.body[0].y,
+    };
 
+    this.direction = this.nextDirection;
     switch (this.direction) {
       case "up":
-        head.y -= this.speed;
+        newHead.y -= this.speed;
         break;
       case "down":
-        head.y += this.speed;
+        newHead.y += this.speed;
         break;
       case "left":
-        head.x -= this.speed;
+        newHead.x -= this.speed;
         break;
       case "right":
-        head.x += this.speed;
+        newHead.x += this.speed;
         break;
     }
 
     var tail = this.body.pop();
-    tail!.x = head.x;
-    tail!.y = head.y;
+    tail!.x = newHead.x;
+    tail!.y = newHead.y;
     this.body.unshift(tail!);
   }
 
@@ -86,20 +91,16 @@ export class Snake {
       this.gameOver();
     }
 
-    for (let i = 2; i < this.body.length; i++) {
+    for (let i = 1; i < this.body.length; i++) {
       if (
-        this.detectEntityCollisions(
+        this.detectGridCollision(
           {
             x: head.x,
             y: head.y,
-            w: this.width,
-            h: this.width,
           },
           {
             x: this.body[i].x,
             y: this.body[i].y,
-            w: this.width,
-            h: this.width,
           }
         )
       ) {
@@ -108,18 +109,14 @@ export class Snake {
     }
 
     if (
-      this.detectEntityCollisions(
+      this.detectGridCollision(
         {
           x: head.x,
           y: head.y,
-          w: this.width,
-          h: this.width,
         },
         {
           x: this.fruitX,
           y: this.fruitY,
-          w: this.width,
-          h: this.width,
         }
       )
     ) {
@@ -141,18 +138,19 @@ export class Snake {
     this.ctx.fillText(`space bar to restart`, 320, 350);
   }
 
+  //dont mutate direction directly else you can break these directions rules between updates
   setDirection(direction: Direction) {
     if (direction === "down" && this.direction !== "up") {
-      this.direction = "down";
+      this.nextDirection = "down";
     }
     if (direction === "up" && this.direction !== "down") {
-      this.direction = "up";
+      this.nextDirection = "up";
     }
     if (direction === "right" && this.direction !== "left") {
-      this.direction = "right";
+      this.nextDirection = "right";
     }
     if (direction === "left" && this.direction !== "right") {
-      this.direction = "left";
+      this.nextDirection = "left";
     }
   }
 
@@ -163,7 +161,7 @@ export class Snake {
     this.fruitY = Math.floor(Math.random() * (squaresY - 1)) * this.width;
   }
 
-  private detectEntityCollisions(rect1: Rectangle, rect2: Rectangle) {
+  private detectEntityCollision(rect1: Rectangle, rect2: Rectangle) {
     if (
       rect1.x < rect2.x + rect2.w &&
       rect1.x + rect1.w > rect2.x &&
@@ -176,5 +174,12 @@ export class Snake {
       // No collision
       return false;
     }
+  }
+
+  private detectGridCollision(node1: Node, node2: Node) {
+    if (node1.x === node2.x && node1.y === node2.y) {
+      return true;
+    }
+    return false;
   }
 }

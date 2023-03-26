@@ -42,7 +42,7 @@ export class Snake {
 
   draw() {
     for (const node of this.body) {
-      this.ctx.fillStyle = "rgb(255, 0, 0)";
+      this.ctx.fillStyle = "rgb(0, 150, 0)";
       this.ctx.fillRect(node.x, node.y, this.width, this.width);
     }
 
@@ -137,6 +137,8 @@ export class Snake {
     this.ctx.fillStyle = "red";
     this.ctx.font = "48px georgia";
     this.ctx.fillText(`Game Over. Score: ${this.score}`, 250, 150);
+    this.ctx.font = "35px georgia";
+    this.ctx.fillText(`space bar to restart`, 320, 350);
   }
 
   setDirection(direction: Direction) {
@@ -155,12 +157,10 @@ export class Snake {
   }
 
   generateFruit() {
-    this.fruitX = Math.floor(
-      Math.random() * (this.canvasWidth - this.width - 500)
-    );
-    this.fruitY = Math.floor(
-      Math.random() * (this.canvasHeight - this.width - 500)
-    );
+    const squaresY = this.canvasHeight / this.width;
+    const squaresX = this.canvasWidth / this.width;
+    this.fruitX = Math.floor(Math.random() * (squaresX - 1)) * this.width;
+    this.fruitY = Math.floor(Math.random() * (squaresY - 1)) * this.width;
   }
 
   private detectEntityCollisions(rect1: Rectangle, rect2: Rectangle) {

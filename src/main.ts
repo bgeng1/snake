@@ -18,6 +18,13 @@ import { Snake } from "./snake";
 
 const height = 1000;
 const width = 1000;
+let gameInterval: number;
+
+const canvas = document.querySelector("canvas");
+
+if (!canvas) {
+  throw Error("cant find html canvas element");
+}
 
 window.addEventListener("keydown", (event) => {
   const { key } = event;
@@ -33,22 +40,23 @@ window.addEventListener("keydown", (event) => {
   if (key === "ArrowRight") {
     snake.setDirection("right");
   }
+  if (key === " ") {
+    clearInterval(gameInterval);
+    gameInterval = setInterval(() => {
+      loop();
+    }, 100);
+    snake = new Snake(canvas, gameInterval);
+  }
 });
 
-const canvas = document.querySelector("canvas");
-
-if (!canvas) {
-  throw Error("cant find html canvas element");
-}
 const ctx = canvas.getContext("2d");
 canvas.width = width;
 canvas.height = height;
 
-const interval = setInterval(() => {
+gameInterval = setInterval(() => {
   loop();
 }, 100);
-
-const snake = new Snake(canvas, interval);
+let snake = new Snake(canvas, gameInterval);
 
 const loop = () => {
   if (!ctx) return;

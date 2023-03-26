@@ -8,25 +8,28 @@ interface Rectangle {
 }
 
 interface Node {
-  x: string;
-  y: string;
-  prev: Node;
+  x: number;
+  y: number;
 }
 
 export class Snake {
   private direction: Direction = "right";
-  private length = 0;
   private ctx: CanvasRenderingContext2D;
-  private headX: number = 500;
-  private headY: number = 500;
-  private speed: number = 3;
-  private width: number = 50;
+  private headNode: Node = {
+    x: 500,
+    y: 500,
+  };
+  private body: Node[] = [this.headNode];
+  private width: number = 25;
+  private speed: number = this.width;
   private canvasHeight: number;
   private canvasWidth: number;
-  private fruitX = 200;
-  private fruitY = 200;
+  private fruitX = 400;
+  private fruitY = 400;
+  private interval: number;
+  private score = 0;
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement, interval: number) {
     const ctx = canvas.getContext("2d");
     if (!ctx) {
       throw Error("snake class error: cant get canvas context");
@@ -34,60 +37,130 @@ export class Snake {
     this.canvasHeight = canvas.height;
     this.canvasWidth = canvas.width;
     this.ctx = ctx;
+    this.interval = interval;
   }
 
   draw() {
-    this.ctx.fillStyle = "rgb(255, 0, 0)";
-    this.ctx.fillRect(this.headX, this.headY, this.width, this.width);
+    for (const node of this.body) {
+      this.ctx.fillStyle = "rgb(255, 0, 0)";
+      this.ctx.fillRect(node.x, node.y, this.width, this.width);
+    }
 
     this.ctx.fillStyle = "rgb(255, 210, 0)";
     this.ctx.fillRect(this.fruitX, this.fruitY, this.width, this.width);
   }
 
   update() {
+    let head = this.body[0];
+
     switch (this.direction) {
       case "up":
-        this.headY -= this.speed;
+        head.y -= this.speed;
         break;
       case "down":
-        this.headY += this.speed;
+        head.y += this.speed;
         break;
       case "left":
-        this.headX -= this.speed;
+        head.x -= this.speed;
         break;
       case "right":
-        this.headX += this.speed;
+        head.x += this.speed;
         break;
     }
+
+    var tail = this.body.pop();
+    tail!.x = head.x;
+    tail!.y = head.y;
+    this.body.unshift(tail!);
   }
 
   detectCollisions() {
+    const head = this.body[0];
     if (
-      this.headX + this.width >= this.canvasWidth ||
-      this.headY + this.width >= this.canvasHeight ||
-      this.headX <= 0 ||
-      this.headY <= 0
+      //add a buffer to each side otherwise its impossible
+      head.x >= this.canvasWidth ||
+      head.y >= this.canvasHeight ||
+      head.x <= -1 ||
+      head.y <= -1
     ) {
-      //boom
-      this.speed = 0;
+      this.gameOver();
     }
+
+    for (let i = 2; i < this.body.length; i++) {
+      if (
+        this.detectEntityCollisions(
+          {
+            x: head.x,
+            y: head.y,
+            w: this.width,
+            h: this.width,
+          },
+          {
+            x: this.body[i].x,
+            y: this.body[i].y,
+            w: this.width,
+            h: this.width,
+          }
+        )
+      ) {
+        this.gameOver();
+      }
+    }
+
     if (
       this.detectEntityCollisions(
-        { x: this.headX, y: this.headY, w: this.width, h: this.width },
-        { x: this.fruitX, y: this.fruitY, w: this.width, h: this.width }
+        {
+          x: head.x,
+          y: head.y,
+          w: this.width,
+          h: this.width,
+        },
+        {
+          x: this.fruitX,
+          y: this.fruitY,
+          w: this.width,
+          h: this.width,
+        }
       )
     ) {
       this.generateFruit();
+      this.body.push({
+        x: head.x,
+        y: head.y,
+      });
+      this.score += 10;
     }
   }
 
+  gameOver() {
+    clearInterval(this.interval);
+    this.ctx.fillStyle = "red";
+    this.ctx.font = "48px georgia";
+    this.ctx.fillText(`Game Over. Score: ${this.score}`, 250, 150);
+  }
+
   setDirection(direction: Direction) {
-    this.direction = direction;
+    if (direction === "down" && this.direction !== "up") {
+      this.direction = "down";
+    }
+    if (direction === "up" && this.direction !== "down") {
+      this.direction = "up";
+    }
+    if (direction === "right" && this.direction !== "left") {
+      this.direction = "right";
+    }
+    if (direction === "left" && this.direction !== "right") {
+      this.direction = "left";
+    }
   }
 
   generateFruit() {
-    this.fruitX = Math.floor(Math.random() * this.canvasWidth - this.width);
-    this.fruitY = Math.floor(Math.random() * this.canvasHeight - this.width);
+    this.fruitX = Math.floor(
+      Math.random() * (this.canvasWidth - this.width - 500)
+    );
+    this.fruitY = Math.floor(
+      Math.random() * (this.canvasHeight - this.width - 500)
+    );
   }
 
   private detectEntityCollisions(rect1: Rectangle, rect2: Rectangle) {

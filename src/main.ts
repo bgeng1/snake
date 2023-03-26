@@ -44,24 +44,20 @@ const ctx = canvas.getContext("2d");
 canvas.width = width;
 canvas.height = height;
 
-const snake = new Snake(canvas);
+const interval = setInterval(() => {
+  loop();
+}, 100);
+
+const snake = new Snake(canvas, interval);
 
 const loop = () => {
   if (!ctx) return;
   ctx.clearRect(0, 0, width, height);
-  // ctx.fillStyle = "rgb(255, 0, 0)";
-  // ctx.fillRect(playerX, playerY, 50, 50);
-  // playerX += 4;
-  // playerY += 0;
 
-  //draw snake
-  snake.draw();
   //update snake
   snake.update();
+  //draw snake
+  snake.draw();
   //detect collision
   snake.detectCollisions();
-
-  requestAnimationFrame(loop);
 };
-
-loop();
